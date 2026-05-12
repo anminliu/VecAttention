@@ -1,0 +1,133 @@
+[project]
+name = "VecAttention"
+version = "0.0.1"
+requires-python = "==3.10.0"
+dependencies = [
+    # --- Core build & setup ---
+    "setuptools>=64",
+    "Cython",
+
+    # --- PyTorch stack ---
+    "torch==2.7.0",
+    "torchcodec==0.5",
+    "torchvision>=0.15.0",
+    "torchaudio",
+    "xformers",
+    "tensor_parallel==2.0.0",
+    "flash-attn==2.7.4.post1",
+    # "flashinfer-python>=0.2.11.post3",
+    "vllm>=0.9.0",
+    "vllm-flash-attn",
+    "block-sparse-attn",
+    "triton",
+
+    # --- ML/NLP toolkits ---
+    "accelerate>=1.10.0",
+    "sentencepiece",
+    "youtokentome",
+    "minference",
+    "datasets<4.0.0",
+    "pyarrow<17.0",
+
+    # --- Evaluation & metrics ---
+    "rouge_score",
+    "rouge",
+    "fuzzywuzzy",
+
+    # --- Visualization & analysis ---
+    "matplotlib>=3.5.0",
+    "seaborn",
+    "pandas",
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "scikit-image",
+    "einops>=0.6.0",
+
+    # --- Utilities ---
+    "tqdm>=4.65.0",
+    "ftfy",
+    "termcolor",
+    "tabulate",
+    "loguru",
+    "wandb",
+    "zstandard",
+    "wonderwords",
+
+    # --- Image / video I/O ---
+    "pillow>=9.0.0",
+    "imageio",
+    "imageio-ffmpeg",
+    "av==15.1.0",
+
+    # --- Dev / test tools ---
+    "pytest",
+    "IPython",
+]
+
+[build-system]
+requires = ["setuptools>=77.0.0", "wheel", "Cython", "cmake>=3.26"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["spattn*","eval*"]
+
+[dependency-groups]
+vlm = [
+    "transformers==4.52.0.dev0",
+    "flashinfer-python>=0.2.11.post3",
+    "vlmeval",
+    "nemo_toolkit[all]",
+]
+dit = [
+    "transformers>=4.52.0,<5.0.0",
+    "flashinfer-python>=0.2.11.post3",
+    "diffusers==0.34.0",
+    "lpips",
+    # "nvidia-nvjitlink-cu12==12.8.61",
+    # "cuvs-cu12",
+]
+
+[tool.uv]
+conflicts = [
+    [
+        {group = "vlm"},
+        {group = "dit"},
+    ],
+]
+
+# default-groups = ["vlm"]
+# [tool.uv]
+override-dependencies = [
+  "triton @ git+https://github.com/openai/triton.git@6e390f3f",
+  "mamba-ssm==2.3.2.post1",
+#   "cuvs-cu12"
+]
+
+[tool.uv.sources]
+vllm-flash-attn = { path = "vllm-flash-attention", editable = true }
+vlmeval = { path = "eval/VLMEvalKit", editable = true }
+transformers = [
+    { group = "vlm", git = "https://github.com/huggingface/transformers", rev = "cb39f7dd5ba874ee1859b47283b08cd3a6ab5a0d" },
+    # { group = "dit", git = "https://github.com/huggingface/transformers"}
+]
+flashinfer-python = [
+    { group = "vlm", git  = "https://github.com/flashinfer-ai/flashinfer"},
+    { group = "dit", path = "eval/DiTEvalKit/kernels/3rdparty/flashinfer", editable = true}
+]
+block-sparse-attn = { git = "https://github.com/mit-han-lab/Block-Sparse-Attention" }
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+torchcodec = { index = "pytorch-cu128" }
+# cuvs-cu12 = {index = "pypinvidia"}
+# triton = { git = "https://github.com/openai/triton.git", rev = "6e390f3f" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+# [[tool.uv.index]]
+# name = "pypinvidia"
+# url = "https://pypi.nvidia.com"

@@ -1,0 +1,9 @@
+[submodule "eval/DiTEvalKit/kernels/3rdparty/cutlass"]
+	path = eval/DiTEvalKit/kernels/3rdparty/cutlass
+	url = https://github.com/NVIDIA/cutlass.git
+[submodule "eval/DiTEvalKit/kernels/3rdparty/flashinfer"]
+	path = eval/DiTEvalKit/kernels/3rdparty/flashinfer
+	url = https://github.com/flashinfer-ai/flashinfer.git
+[submodule "eval/DiTEvalKit/kernels/3rdparty/pybind"]
+	path = eval/DiTEvalKit/kernels/3rdparty/pybind
+	url = https://github.com/pybind/pybind11.git
