@@ -7,3 +7,6 @@
 [submodule "eval/DiTEvalKit/kernels/3rdparty/pybind"]
 	path = eval/DiTEvalKit/kernels/3rdparty/pybind
 	url = https://github.com/pybind/pybind11.git
+[submodule "vllm-flash-attention/csrc/cutlass"]
+	path = vllm-flash-attention/csrc/cutlass
+	url = https://github.com/NVIDIA/cutlass.git
