@@ -1,12 +1,30 @@
-import os
 import torch
+
+NEEDLE = (
+    "VecAttention is a vector-wise sparse attention framework for efficient long-context "
+    "video understanding and generation. Long-context video understanding and generation "
+    "pose a significant computational challenge for Transformer-based video models due to "
+    "the quadratic complexity of self-attention. While existing sparse attention methods "
+    "employ coarse-grained patterns to improve efficiency, they typically incur redundant "
+    "computation and suboptimal performance. To address this issue, VecAttention proposes "
+    "a novel vector-wise sparse attention framework that achieves superior accuracy-"
+    "efficiency trade-offs for video models. The key observation is that video attention "
+    "maps exhibit a strong vertical-vector sparse pattern, and this vertical-vector "
+    "pattern offers consistently better accuracy-sparsity trade-offs compared with "
+    "existing coarse-grained sparse patterns. Based on this observation, VecAttention "
+    "dynamically selects and processes only informative vertical vectors through a "
+    "lightweight important-vector selection that minimizes memory access overhead and "
+    "an optimized vector sparse attention kernel. Comprehensive evaluations on video "
+    "understanding (VideoMME, LongVideoBench, and VCRBench) and generation (VBench) "
+    "tasks show that VecAttention delivers a 2.65x speedup over full attention and a "
+    "1.83x speedup over state-of-the-art sparse attention methods, with comparable "
+    "accuracy to full attention."
+)
+
 
 def generate_prompt(tokenizer, target_len):
     context = "A quick brown fox jumps over the lazy dog. \n"
-    _here = os.path.dirname(os.path.abspath(__file__))
-    needle_path = os.path.join(_here, "..", "..", "demo", "vecattention.txt")
-    with open(needle_path, "r") as f:
-        needle = f.read()
+    needle = NEEDLE
 
     num_tokens_context = len(tokenizer.encode(context, add_special_tokens=False))
     num_repetitions = target_len // num_tokens_context

@@ -120,18 +120,18 @@ out = VecAttention_prefill(
 
 The `demo/` directory contains three scripts for quickly trying VecAttention:
 
-### Long-context inference demo
+### Vision NIAH demo
 
-`demo/demo.py` loads a Qwen2.5-VL model, patches its attention layers with VecAttention, and runs a needle-in-a-haystack (NIAH) task to verify both correctness and speedup.
+Loads a Qwen2.5-VL model, patches its attention layers with VecAttention, and runs a vision needle-in-a-haystack task to verify both correctness and speedup. Requires a long haystack video (≥1h recommended) on disk — pass its path via `--haystack_movie_path`.
 
 ```bash
 source .venv/bin/activate
 
 # Run with VecAttention
-python demo/demo.py --metric vecattention --len 65536 --threshold 0.9
+python demo/vision_demo.py --haystack_movie_path /path/to/movie.mp4 --nframe 180 --metric vecattention  --threshold 0.87
 
 # Run with full attention (baseline comparison)
-python demo/demo.py --metric full --len 65536
+python demo/vision_demo.py --haystack_movie_path /path/to/movie.mp4 --nframe 180 --metric full
 ```
 
 ### VLM evaluation demo
