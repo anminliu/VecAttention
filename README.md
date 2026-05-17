@@ -2,6 +2,57 @@
 
 [![Paper](https://img.shields.io/badge/Paper-2603.29494-b31b1b.svg?style=plastic&logo=arxiv)](https://arxiv.org/abs/2603.29494)
 
+## Showcase
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th align="center">Full Attention</th>
+      <th align="center">VecAttention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th align="center" scope="row">
+        Video Understanding
+      </th>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/01baf105-6f33-4500-8e14-dee4371b8c72" controls width="360"></video>
+      </td>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/748690b6-4734-452d-ac51-64ba00659c7b" controls width="360"></video>
+      </td>
+    </tr>
+    <tr>
+      <th align="center" scope="row">
+        Video Generation
+      </th>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/5970eece-ff57-472a-aaac-4c7570dec9a2" controls width="360"></video>
+      </td>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/7b827449-00d8-4406-943f-3f658687db3d" controls width="360"></video>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Abstract
 
 Long-context video understanding and generation pose a significant computational challenge for Transformer-based video models due to the quadratic complexity of self-attention. While existing sparse attention methods employ coarse-grained patterns to improve efficiency, they typically incur redundant computation and suboptimal performance. To address this issue, in this paper, we propose **VecAttention**, a novel framework of vector-wise sparse attention that achieves superior accuracy-efficiency trade-offs for video models. We observe that video attention maps exhibit a strong vertical-vector sparse pattern, and further demonstrate that this vertical-vector pattern offers consistently better accuracy-sparsity trade-offs compared with existing coarse-grained sparse patterns. Based on this observation, VecAttention dynamically selects and processes only informative vertical vectors through a lightweight important-vector selection that minimizes memory access overhead and an optimized kernel of vector sparse attention. Comprehensive evaluations on video understanding (VideoMME, LongVideoBench, and VCRBench) and generation (VBench) tasks show that VecAttention delivers a 2.65x speedup over full attention and a 1.83x speedup over state-of-the-art sparse attention methods, with comparable accuracy to full attention.
