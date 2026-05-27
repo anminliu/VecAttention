@@ -1,4 +1,4 @@
-from spattn.src.utils import *
+from spattn.src.utils import find_blocks_chunked
 import torch
 import math
 import time

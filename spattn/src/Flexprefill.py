@@ -9,6 +9,8 @@ import triton.language as tl
 from einops import rearrange
 from flash_attn import flash_attn_func
 
+from spattn.src.utils import triton_bnhd_pool
+
 def torch_block_wise_attention(
     q: torch.Tensor,
     k: torch.Tensor,
@@ -650,138 +652,6 @@ def triton_block_wise_attention(
         return triton_block_wise_decode_attention(
             q, k, v, block_idx, block_size, softmax_scale, gqa_interleave
         )
-
-
-@triton.jit
-def bnhd_pool_kernel(
-    x_ptr,
-    y_ptr,
-    # pool type. avg: 0, max: 1, min: 2, max abs: 3, sum: 4
-    pool_type: tl.constexpr,
-    # shape
-    batch_size,
-    seq_len,
-    num_heads,
-    head_dim: tl.constexpr,
-    # stride
-    stride_xb,
-    stride_xn,
-    stride_xh,
-    stride_xd,
-    stride_yb,
-    stride_yn,
-    stride_yh,
-    stride_yd,
-    # META parameters
-    BLOCK_SIZE_N: tl.constexpr,
-    BLOCK_SIZE_H: tl.constexpr,  # {16, 32, 64, 128, 256, 512}
-    BLOCK_SIZE_D: tl.constexpr,  # {16, 32, 64, 128, 256, 512}
-):
-    pid_b = tl.program_id(0)
-    pid_n = tl.program_id(1)
-    pid_h = tl.program_id(2)
-
-    x_ptr = (
-        x_ptr
-        + pid_b * stride_xb
-        + pid_n * BLOCK_SIZE_N * stride_xn
-        + pid_h * BLOCK_SIZE_H * stride_xh
-    )
-
-    off_n = tl.arange(0, BLOCK_SIZE_N)
-    off_h = tl.arange(0, BLOCK_SIZE_H)
-    off_d = tl.arange(0, BLOCK_SIZE_D)
-
-    cur_block_size_n = min(seq_len - pid_n * BLOCK_SIZE_N, BLOCK_SIZE_N)
-
-    x_mask = (
-        (off_n < seq_len - pid_n * BLOCK_SIZE_N)[:, None, None]
-        & (off_h < num_heads - pid_h * BLOCK_SIZE_H)[None, :, None]
-        & (off_d < head_dim)[None, None, :]
-    )
-    x = tl.load(
-        x_ptr
-        + off_n[:, None, None] * stride_xn
-        + off_h[None, :, None] * stride_xh
-        + off_d[None, None, :] * stride_xd,
-        mask=x_mask,
-        other=0,
-    )
-    if pool_type == 0:
-        y = tl.sum(x, axis=0) / cur_block_size_n
-    elif pool_type == 1:
-        y = tl.max(x, axis=0)
-    elif pool_type == 2:
-        y = tl.min(x, axis=0)
-    elif pool_type == 3:
-        y = tl.max(tl.abs(x), axis=0)
-    elif pool_type == 4:
-        y = tl.sum(x, axis=0)
-    else:
-        y = tl.sum(x, axis=0) / cur_block_size_n
-    y_ptr = (
-        y_ptr + pid_b * stride_yb + pid_n * stride_yn + pid_h * BLOCK_SIZE_H * stride_yh
-    )
-    y_mask = (off_h < num_heads - pid_h * BLOCK_SIZE_H)[:, None] & (off_d < head_dim)[
-        None, :
-    ]
-    tl.store(
-        y_ptr + off_h[:, None] * stride_yh + off_d[None, :] * stride_yd, y, mask=y_mask
-    )
-
-
-def triton_bnhd_pool(x: torch.Tensor, kernel_size: int, pool_type: str = "avg"):
-    b, n, h, d = x.shape
-    assert d in {16, 32, 64, 128}
-    assert kernel_size in {1, 16, 32, 64, 128, 256, 512}
-    if kernel_size == 1:
-        return x
-    m = triton.cdiv(n, kernel_size)
-    y = torch.zeros(b, m, h, d, device=x.device, dtype=x.dtype)
-
-    if pool_type == "last":
-        if n % kernel_size == 0:
-            return x[:, kernel_size - 1 :: kernel_size, ...]
-        else:
-            return torch.cat(
-                (x[:, kernel_size - 1 :: kernel_size, ...], x[:, -1:, ...]), dim=1
-            )
-
-    block_size_h = triton.next_power_of_2(h)
-    while kernel_size * block_size_h * d > 128 * 128 * 128:
-        block_size_h = block_size_h // 2
-    assert block_size_h != 0 
-    
-    block_size_d = triton.next_power_of_2(d)
-    pool_str_to_type = {"avg": 0, "max": 1, "min": 2, "maxabs": 3, "sum": 4}
-    pool_type = pool_str_to_type[pool_type]
-
-    grid = lambda META: (
-        b,
-        triton.cdiv(n, META["BLOCK_SIZE_N"]),
-        triton.cdiv(h, META["BLOCK_SIZE_H"]),
-    )
-    bnhd_pool_kernel[grid](
-        x,
-        y,
-        pool_type,
-        b,
-        n,
-        h,
-        d,
-        x.stride(0),
-        x.stride(1),
-        x.stride(2),
-        x.stride(3),
-        y.stride(0),
-        y.stride(1),
-        y.stride(2),
-        y.stride(3),
-        BLOCK_SIZE_N=kernel_size,
-        BLOCK_SIZE_H=block_size_h,
-        BLOCK_SIZE_D=block_size_d,
-    )
-    return y
 
 
 @triton.jit

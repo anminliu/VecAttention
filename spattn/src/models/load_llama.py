@@ -10,7 +10,6 @@ from transformers.models.llama.modeling_llama import (
 import flashinfer
 import time
 
-from spattn.src.utils import *
 from spattn.src.models.config_args import FastPrefillConfig
 from spattn.src.models.utils import customize_prefill_attention
 import os
