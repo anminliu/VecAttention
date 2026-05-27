@@ -76,7 +76,7 @@ Long-context video understanding and generation pose a significant computational
 
 ### 0. Clone the repository
 
-VecAttention uses git submodules for the DiTEvalKit third-party kernels (cutlass, flashinfer, pybind11). Always clone with `--recurse-submodules`:
+VecAttention uses git submodules for `vllm-flash-attention` and the DiTEvalKit third-party kernels. Always clone with `--recurse-submodules`:
 
 ```bash
 git clone --recurse-submodules https://github.com/anminliu/VecAttention.git
@@ -118,7 +118,7 @@ This creates a `uv` virtual environment (`.venv/`) and installs the core Python 
 
 ### 3. Build the custom vLLM Flash Attention backend
 
-VecAttention's sparse attention kernel requires a modified version of vLLM Flash Attention. Build it once before running any evaluation:
+VecAttention's sparse attention kernel requires our [vllm-flash-attention](https://github.com/anminliu/vllm-flash-attention) submodule (a modified version of [vllm-project/flash-attention](https://github.com/vllm-project/flash-attention)). Make sure submodules were initialized recursively (see step 0), then build it once:
 
 ```bash
 make fainstall
@@ -414,9 +414,8 @@ Thanks to:
 
 - [XAttention](https://github.com/mit-han-lab/x-attention) — block sparse attention baseline and codebase structure reference
 - [FlexPrefill](https://github.com/bytedance/FlexPrefill) — flexible prefill baseline
-- [FlashAttention](https://github.com/Dao-AILab/flash-attention) — efficient attention kernel
-- [vLLM](https://github.com/vllm-project/vllm) — inference framework integration
-- [FlashInfer](https://github.com/flashinfer-ai/flashinfer) — sparse attention dispatch
+- [FlashInfer](https://github.com/flashinfer-ai/flashinfer) — provides high-performance kernels
 - [VLMEvalKit](https://github.com/open-compass/VLMEvalKit) — video understanding evaluation
 - [Sparse-VideoGen](https://github.com/svg-project/Sparse-VideoGen) — sparse video generation baseline
+- [FlashAttention](https://github.com/vllm-project/flash-attention) — upstream that `vllm-flash-attention/` is modified from
 
